@@ -25,8 +25,10 @@ const Navbar = () => {
         <p className="text-slate-900/80 text-sm capitalize">thailand</p>
         <div className="">
         {/* SeachBox */}
+    <>
+    <SeachBox/>
     
-     <SeachBox/>
+    </>
       </div>
       </section>
      
