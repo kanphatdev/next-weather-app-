@@ -1,6 +1,7 @@
 "use client";
 import Container from "@/components/Container";
-import Navbar from "@/components/Navbar";
+import ForecastWeatherDetail from "@/components/ForecastWeatherDetail";
+import { Navbar } from "@/components/Navbar"; 
 import WeatherDetail from "@/components/WeatherDetail";
 import WeatherIcon from "@/components/WeatherIcon";
 import { convertKelvinToCelsius } from "@/utils/convertKelvinToCelsius";
@@ -80,8 +81,24 @@ export default function Home() {
     }
   );
   const firstData = data?.list[0];
+
   console.log("data", data);
 
+  const uniqueDates = [
+    ...new Set(
+      data?.list.map(
+        (entry) => new Date(entry.dt * 1000).toISOString().split("T")[0]
+      )
+    ),
+  ];
+const firstDataForEachDate = uniqueDates.map( (date) => {
+  return  data?.list.find((entry) => {
+    const entryDate = new Date(entry.dt * 1000).toISOString().split("T")[0];
+    const entryTime = new Date(entry.dt * 1000).getHours();
+    return entryDate === date && entryTime >=6
+
+  })
+} );
   if (isLoading)
     return (
       <div className="flex items-center min-h-screen justify-center">
@@ -179,7 +196,7 @@ export default function Home() {
                     fromUnixTime(data?.city.sunset ?? 1702517657),
                     "H:mm"
                   )}
-                  windSpeed={convertWinSpeed(firstData?.wind.speed?? 1.64)}
+                  windSpeed={convertWinSpeed(firstData?.wind.speed ?? 1.64)}
                 />
               </Container>
             </div>
@@ -190,6 +207,30 @@ export default function Home() {
             <p className="capitalize text-gray-500 text-2xl">
               forecast <span className="text-amber-400">(7 days)</span>
             </p>
+            {firstDataForEachDate.map((d,i) =>(
+
+            <ForecastWeatherDetail key={i}
+            description={d?.weather[0].description ?? ""}
+            weatherIcon={d?.weather[0].icon ?? "01d"}
+            date={format(parseISO(d?.dt_txt ?? ""), "dd.MM")}
+            day={format(parseISO(d?.dt_txt ?? ""), "EEEE")}
+            feels_like={d?.main.feels_like ?? 0}
+            temp={d?.main.temp ?? 0}
+            temp_max={d?.main.temp_max ?? 0}
+            temp_min={d?.main.temp_min ?? 0}
+            airPressure={`${d?.main.pressure} hPa `}
+            humidity={`${d?.main.humidity}% `}
+            sunrise={format(
+              fromUnixTime(data?.city.sunrise ?? 1702517657),
+              "H:mm"
+            )}
+            sunset={format(
+              fromUnixTime(data?.city.sunset ?? 1702517657),
+              "H:mm"
+            )}
+            visability={`${metersToKilometers(d?.visibility ?? 10000)} `}
+            windSpeed={`${convertWinSpeed(d?.wind.speed ?? 1.64)} `} />
+            ) )}
           </section>
         </main>
       </div>
